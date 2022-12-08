@@ -1,0 +1,19 @@
+<div class="row py-2 px-2">
+  <div class="col">
+    <ul ngbNav #nav="ngbNav" class="nav-tabs">
+      <li ngbNavItem>
+        <a ngbNavLink>Dashboard</a>
+        <ng-template ngbNavContent>
+          <app-dashboard></app-dashboard>
+        </ng-template>
+      </li>
+      <li ngbNavItem>
+        <a ngbNavLink>Create</a>
+        <ng-template ngbNavContent>
+          <app-creat-pet></app-creat-pet>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+  </div>
+</div>

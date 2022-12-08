@@ -9,10 +9,10 @@ import (
 
 type Pet struct {
 	gorm.Model
-	Name        string `json:"name"`
+	Name        string `json:"name" binding:"required"`
 	Type        string `json:"type"`
 	Description string `json:"description"`
-	Age         int64  `json:"age"`
+	Age         string `json:"age"`
 	// Birthdate   string `json:"birthdate"`
 	// Age         int64  `json:"age"`
 	// Image       []byte `json:"image"`
