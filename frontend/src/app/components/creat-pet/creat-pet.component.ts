@@ -9,6 +9,9 @@ import { PetService } from 'src/app/services/pet.service';
   styleUrls: ['./creat-pet.component.css']
 })
 export class CreatPetComponent implements OnInit {
+  files?: FileList;
+  previews : string[] = [];
+  progressInfos: any[] =[];
   petForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     type: new FormControl('', [Validators.required]),
@@ -20,6 +23,24 @@ export class CreatPetComponent implements OnInit {
   constructor(private petService: PetService) { }
 
   ngOnInit(): void {
+  }
+
+  selectedFiles(event: any) {
+    this.progressInfos = [];
+    this.previews = [];
+    this.files = event.target.files;
+
+    if(this.files && this.files.length > 0) {
+      for(let i = 0; i < this.files.length; i++) {
+        const reader = new FileReader();
+
+        reader.onload = (e: any) => {
+          this.previews.push(e.target.result);
+        };
+
+        reader.readAsDataURL(this.files[i])
+      }
+    }
   }
 
   create(): void {

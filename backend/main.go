@@ -11,6 +11,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/forceattack012/petAppApi/file"
 	"github.com/forceattack012/petAppApi/pet"
 )
 
@@ -27,7 +28,9 @@ func main() {
 	}
 
 	db.AutoMigrate(&pet.Pet{})
+	db.AutoMigrate(&file.File{})
 	petHandler := pet.NewPetHandler(db)
+	fileHandler := file.NewFileHandler(db)
 
 	r := gin.Default()
 	config := cors.DefaultConfig()
@@ -54,6 +57,8 @@ func main() {
 
 	r.POST("/api/pet", petHandler.NewPet)
 	r.GET("/api/pet", petHandler.GetPets)
+	r.POST("/api/upload", fileHandler.Upload)
+	r.GET("/api/download", fileHandler.Download)
 
 	port := ":" + os.Getenv("PORT")
 	r.Run(port)

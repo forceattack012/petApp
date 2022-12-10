@@ -3,20 +3,18 @@ package pet
 import (
 	"net/http"
 
+	"github.com/forceattack012/petAppApi/file"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type Pet struct {
 	gorm.Model
-	Name        string `json:"name" binding:"required"`
-	Type        string `json:"type"`
-	Description string `json:"description"`
-	Age         string `json:"age"`
-	// Birthdate   string `json:"birthdate"`
-	// Age         int64  `json:"age"`
-	// Image       []byte `json:"image"`
-	// gorm.Model
+	Name        string      `json:"name" binding:"required"`
+	Type        string      `json:"type"`
+	Description string      `json:"description"`
+	Age         string      `json:"age"`
+	Files       []file.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 func (Pet) Tablename() string {

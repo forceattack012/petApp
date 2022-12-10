@@ -3,6 +3,18 @@
 </div>
 <div class="row d-flex justify-content-center py-3">
   <form [formGroup]="petForm">
+    <div class="row">
+      <div class="col-6">
+        <label class="btn btn-default p-0">
+          <input type="file" accept="image/*" class="btm btn-info" multiple (change)="selectedFiles($event)">
+        </label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <img *ngFor="let preview of previews" [src]="preview" class="preview">
+      </div>
+    </div>
     <div class="form-group">
       <label for="name">Name</label>
       <input type="text" class="form-control" id="name" placeholder="ally" formControlName="name" />
