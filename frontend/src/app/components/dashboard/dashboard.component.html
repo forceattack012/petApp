@@ -1,1 +1,51 @@
-<p>dashboard works!</p>
+<div *ngIf="!isEdit">
+  <div class="row d-flex justify-content-center">
+    <h1 class="row text-primary">Dashboard Pets</h1>
+  </div>
+  <div class="container">
+    <div class="row px-2 justify-content-center" *ngIf="items.items">
+      <div class="px-2 py-2" *ngFor="let item of items.items">
+        <div class="card" style="width: 18rem">
+          <img
+            class="card-img-top"
+            [src]="b64Image(item.files[0].content)"
+            height="100px"
+            alt="Image Source"
+          />
+          <div class="card-body">
+            <h5 class="card-title">{{ item.name }}</h5>
+            <p class="card-text">
+              {{ item.description }}
+            </p>
+            <div>
+              <div>
+                <button class="btn btn-primary mx-1">Add</button>
+                <button
+                  class="btn btn-warning mx-1"
+                  (click)="gotoEdit(item.ID)"
+                >
+                  Edit
+                </button>
+                <button class="btn btn-danger mx-1" (click)="remove(item.ID)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row d-flex justify-content-center">
+    <ngb-pagination
+      class="row text-primary py-5"
+      [(page)]="page"
+      [collectionSize]="totalRows"
+      [maxSize]="12"
+      (pageChange)="loadPage($event)"
+    ></ngb-pagination>
+  </div>
+</div>
+
+<app-edit-pet [id]="id" [isEdit]="isEdit"></app-edit-pet>

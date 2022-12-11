@@ -1,9 +1,10 @@
 POST http://localhost:8082/api/pet
 Content-Type: application/json
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTY3MDc4MzU2NH0.pIwXcdfxiZvjqCgKlSartXm8suIVA1cjhvptG8LTeOI
 
 {
     "name": "ally",
     "type": "dog",
     "description": "this is her dog",
-    "age": 26
+    "age": "26"
 }

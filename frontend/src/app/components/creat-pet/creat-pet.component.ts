@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {FormGroup, FormControl, Validators} from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Pet } from 'src/app/models/pet';
 import { PetService } from 'src/app/services/pet.service';
+import { UploadFileService } from 'src/app/services/upload-file.service';
 
 @Component({
   selector: 'app-creat-pet',
@@ -9,20 +11,22 @@ import { PetService } from 'src/app/services/pet.service';
   styleUrls: ['./creat-pet.component.css']
 })
 export class CreatPetComponent implements OnInit {
-  files?: FileList;
+  files?: File[] = [];
   previews : string[] = [];
+  s: string = '';
   progressInfos: any[] =[];
   petForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     type: new FormControl('', [Validators.required]),
     description: new FormControl(''),
-    age: new FormControl('')
+    age: new FormControl('',[Validators.pattern("^[0-9]*$")])
   });
 
 
-  constructor(private petService: PetService) { }
+  constructor(private petService: PetService, private uploadFileService: UploadFileService, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
+    this.s = this.activatedRoute.snapshot.paramMap.get('s')
   }
 
   selectedFiles(event: any) {
@@ -46,7 +50,12 @@ export class CreatPetComponent implements OnInit {
   create(): void {
     if(this.petForm.valid){
       this.petService.createPet(this.petForm.value).subscribe(result => {
-        window.location.href = "/"
+        console.log(result.ID);
+        if(this.files){
+          this.uploadFileService.upload(result.ID, this.files).subscribe(result => {
+            window.location.href = "/"
+          })
+        }
       })
     }
   }

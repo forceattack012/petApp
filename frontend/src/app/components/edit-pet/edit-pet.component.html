@@ -1,24 +1,21 @@
-<div *ngIf="s !=='1'">
-  <div class="row d-flex justify-content-center">
-    <h1 class="row text-primary">Create your pet</h1>
+<div *ngIf="id && isEdit">
+  <div>
+    <div class="row d-flex justify-content-center">
+      <h1 class="row text-primary">Edit Pet</h1>
+    </div>
   </div>
+
   <div class="row d-flex justify-content-center py-3">
     <form [formGroup]="petForm">
-      <div class="row">
-        <div class="col-6">
-          <label class="btn btn-default p-0">
-            <input type="file" accept="image/*" class="btm btn-info" multiple (change)="selectedFiles($event)">
-          </label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-12">
-          <img *ngFor="let preview of previews" [src]="preview" class="preview">
-        </div>
-      </div>
       <div class="form-group">
         <label for="name">Name</label>
-        <input type="text" class="form-control" id="name" placeholder="ally" formControlName="name" />
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          placeholder="ally"
+          formControlName="name"
+        />
       </div>
       <div class="form-group">
         <label for="type">Type</label>
@@ -39,12 +36,23 @@
       </div>
       <div class="form-group">
         <label for="age">Age</label>
-        <input type="text" class="form-control" id="age" placeholder="26" formControlName="age"/>
+        <input
+          type="text"
+          class="form-control"
+          id="age"
+          placeholder="26"
+          formControlName="age"
+        />
       </div>
       <div class="row d-flex justify-content-center">
-          <button type="submit" class="btn btn-lg btn-primary mb-2" (click)="create()">Create</button>
+        <button
+          type="submit"
+          class="btn btn-lg btn-primary mb-2"
+          (click)="edit()"
+        >
+          Edit
+        </button>
       </div>
     </form>
   </div>
 </div>
-

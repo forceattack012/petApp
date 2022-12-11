@@ -1,0 +1,9 @@
+PATCH  http://localhost:8082/api/pet/16
+Content-Type: application/json
+
+{
+    "name": "ally",
+    "type": "dog",
+    "description": "this is her cat",
+    "age": "26"
+}

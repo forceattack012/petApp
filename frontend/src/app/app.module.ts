@@ -8,15 +8,20 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgbNavConfig, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { CreatPetComponent } from './components/creat-pet/creat-pet.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { EditPetComponent } from './components/edit-pet/edit-pet.component';
+import { LoginComponent } from './components/login/login.component';
+import { Interceptor } from './interceptor/interceptor';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     DashboardComponent,
-    CreatPetComponent
+    CreatPetComponent,
+    EditPetComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -27,7 +32,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     FormsModule,
     ReactiveFormsModule
   ],
-  providers: [NgbNavConfig],
+  providers: [{
+    provide: HTTP_INTERCEPTORS,
+    useClass: Interceptor,
+    multi: true
+  },NgbNavConfig],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -16,7 +16,7 @@ type File struct {
 	Name    string `json:"name" binding:"required"`
 	Content string `json:"content" binding:"required"`
 	Format  string `json:"format"`
-	PetID   uint
+	PetID   int
 }
 
 type FileHandler struct {
@@ -28,6 +28,16 @@ func NewFileHandler(db *gorm.DB) *FileHandler {
 }
 
 func (h *FileHandler) Upload(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	form, err := c.MultipartForm()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -35,6 +45,7 @@ func (h *FileHandler) Upload(c *gin.Context) {
 		})
 		return
 	}
+
 	var fileList []File
 	files := form.File["files[]"]
 
@@ -56,11 +67,12 @@ func (h *FileHandler) Upload(c *gin.Context) {
 			Content: sEncoded,
 			Format:  format,
 			Model:   gorm.Model{},
+			PetID:   id,
 		}
 		fileList = append(fileList, f)
 	}
 
-	result := h.db.Create(fileList)
+	result := h.db.Create(&fileList)
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -68,7 +80,7 @@ func (h *FileHandler) Upload(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"ID": 1,
+		"ID": fileList[0].PetID,
 	})
 }
 

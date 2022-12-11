@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  petPath: '/api/pet'
+  petPath: '/api/pet',
+  loginPath: '/api/login'
 };
 
 /*

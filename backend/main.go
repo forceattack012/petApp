@@ -11,8 +11,10 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/forceattack012/petAppApi/auth"
 	"github.com/forceattack012/petAppApi/file"
 	"github.com/forceattack012/petAppApi/pet"
+	"github.com/forceattack012/petAppApi/user"
 )
 
 func main() {
@@ -29,8 +31,10 @@ func main() {
 
 	db.AutoMigrate(&pet.Pet{})
 	db.AutoMigrate(&file.File{})
+	db.AutoMigrate(&user.User{})
 	petHandler := pet.NewPetHandler(db)
 	fileHandler := file.NewFileHandler(db)
+	userHandler := user.NewUserHandler(db)
 
 	r := gin.Default()
 	config := cors.DefaultConfig()
@@ -55,9 +59,20 @@ func main() {
 		})
 	})
 
-	r.POST("/api/pet", petHandler.NewPet)
+	signature := os.Getenv("signature")
+	bytes := []byte(signature)
+
+	r.POST("/api/register", userHandler.CreateUser)
+	r.POST("/api/login", userHandler.Login(bytes))
 	r.GET("/api/pet", petHandler.GetPets)
-	r.POST("/api/upload", fileHandler.Upload)
+
+	protect := r.Group("", auth.Protect(bytes))
+	protect.POST("/api/pet", petHandler.NewPet)
+	protect.GET("/api/pet/:id", petHandler.GetPet)
+	protect.PATCH("/api/pet/:id", petHandler.UpdatePet)
+	protect.DELETE("/api/pet/:id", petHandler.DeletePet)
+
+	r.POST("/api/upload/:id", fileHandler.Upload)
 	r.GET("/api/download", fileHandler.Download)
 
 	port := ":" + os.Getenv("PORT")
