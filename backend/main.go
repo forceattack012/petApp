@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/ReneKroon/ttlcache"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -12,7 +13,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/forceattack012/petAppApi/auth"
+	"github.com/forceattack012/petAppApi/basket"
 	"github.com/forceattack012/petAppApi/file"
+	"github.com/forceattack012/petAppApi/owner"
 	"github.com/forceattack012/petAppApi/pet"
 	"github.com/forceattack012/petAppApi/user"
 )
@@ -29,12 +32,17 @@ func main() {
 		panic("connect database failed !!!")
 	}
 
+	var cache = ttlcache.NewCache()
+
 	db.AutoMigrate(&pet.Pet{})
 	db.AutoMigrate(&file.File{})
 	db.AutoMigrate(&user.User{})
+	db.AutoMigrate(&owner.Owner{})
 	petHandler := pet.NewPetHandler(db)
 	fileHandler := file.NewFileHandler(db)
 	userHandler := user.NewUserHandler(db)
+	ownerHandler := owner.NewOwnerHandler(db)
+	basketHandler := basket.NewBasketHandler(cache)
 
 	r := gin.Default()
 	config := cors.DefaultConfig()
@@ -71,6 +79,13 @@ func main() {
 	protect.GET("/api/pet/:id", petHandler.GetPet)
 	protect.PATCH("/api/pet/:id", petHandler.UpdatePet)
 	protect.DELETE("/api/pet/:id", petHandler.DeletePet)
+
+	protect.POST("/api/basket", basketHandler.Add)
+	protect.GET("/api/basket/:username", basketHandler.Get)
+
+	protect.POST("/api/owner", ownerHandler.CreateOwner)
+	protect.GET("/api/owner/:userId", petHandler.GetOwnerByUserId)
+	protect.DELETE("/api/owner/:id", ownerHandler.RemoveOwner)
 
 	r.POST("/api/upload/:id", fileHandler.Upload)
 	r.GET("/api/download", fileHandler.Download)

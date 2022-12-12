@@ -13,6 +13,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EditPetComponent } from './components/edit-pet/edit-pet.component';
 import { LoginComponent } from './components/login/login.component';
 import { Interceptor } from './interceptor/interceptor';
+import { BasketComponent } from './components/basket/basket.component';
+import { MyPetsComponent } from './components/my-pets/my-pets.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +23,9 @@ import { Interceptor } from './interceptor/interceptor';
     DashboardComponent,
     CreatPetComponent,
     EditPetComponent,
-    LoginComponent
+    LoginComponent,
+    BasketComponent,
+    MyPetsComponent
   ],
   imports: [
     BrowserModule,

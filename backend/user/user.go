@@ -4,14 +4,16 @@ import (
 	"net/http"
 
 	"github.com/forceattack012/petAppApi/auth"
+	"github.com/forceattack012/petAppApi/owner"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string        `json:"username"`
+	Password string        `json:"password"`
+	Owners   []owner.Owner `json:"owners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type UserHandler struct {
@@ -77,6 +79,7 @@ func (h *UserHandler) Login(signature []byte) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
+			"id":    userLogin.Model.ID,
 			"name":  userLogin.Username,
 			"token": token,
 		})

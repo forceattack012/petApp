@@ -23,6 +23,14 @@ export class UserService {
     localStorage.setItem('name', name);
   }
 
+  saveUserId(userId: string) {
+    localStorage.setItem('userId', userId);
+  }
+
+  getUserId(){
+    return localStorage.getItem('userId');
+  }
+
   getName(){
     return localStorage.getItem('name');
   }

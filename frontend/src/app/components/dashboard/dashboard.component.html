@@ -19,14 +19,15 @@
             </p>
             <div>
               <div>
-                <button class="btn btn-primary mx-1">Add</button>
+                <button id="add-{{item.ID}}" class="btn btn-primary mx-1" (click)="add(item)">Add</button>
                 <button
+                  id="edit-{{item.ID}}"
                   class="btn btn-warning mx-1"
                   (click)="gotoEdit(item.ID)"
                 >
                   Edit
                 </button>
-                <button class="btn btn-danger mx-1" (click)="remove(item.ID)">
+                <button id="remove-{{item.ID}}" class="btn btn-danger mx-1" (click)="remove(item.ID)">
                   Remove
                 </button>
               </div>
@@ -49,3 +50,4 @@
 </div>
 
 <app-edit-pet [id]="id" [isEdit]="isEdit"></app-edit-pet>
+<app-basket [isBasket]="isBasket" [basket]="basket" (pets)="onChangePet($event)" (removePetId)="onChangeRemoveId($event)"></app-basket>

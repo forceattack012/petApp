@@ -1,0 +1,3 @@
+DELETE http://localhost:8082/api/owner/6
+Content-Type: application/json
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTY3MDg0OTY3Nn0.ald7C_KnkxCxNSiQtdKWVOZWwtZiECwdlEH27QW_EY0

@@ -10,15 +10,23 @@ import { UserService } from 'src/app/services/user.service';
 })
 export class LoginComponent implements OnInit {
   s = '';
-  loginForm = new FormGroup({
-    username: new FormControl('', Validators.required),
-    password: new FormControl('', Validators.required)
-  })
+  loginForm: FormGroup;
 
   constructor(private userService: UserService, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.s = this.activatedRoute.snapshot.paramMap.get('s')
+    this.loginForm = new FormGroup({
+      username: new FormControl('', Validators.required),
+      password: new FormControl('', Validators.required)
+    })
+  }
+
+  get username () {
+    return this.loginForm.get('username')
+  }
+  get password () {
+    return this.loginForm.get('password')
   }
 
   Login() {
@@ -28,6 +36,7 @@ export class LoginComponent implements OnInit {
     this.userService.login(this.loginForm.value).subscribe(result => {
       this.userService.saveToken(result.token);
       this.userService.saveName(result.name);
+      this.userService.saveUserId(result.id);
       window.location.href = "/"
     })
   }

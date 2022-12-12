@@ -1,0 +1,28 @@
+<div id="basket" *ngIf="isBasket">
+  <div class="row px-2 flex-column center" *ngIf="basket">
+    <div class="px-2 py-2" *ngFor="let item of basket.pets">
+      <div class="card" style="width: 18rem">
+        <img
+          class="card-img-top"
+          [src]="b64Image(item.files[0].content)"
+          height="100px"
+          alt="Image Source"
+        />
+        <div class="card-body">
+          <h5 class="card-title">{{ item.name }}</h5>
+          <p class="card-text">
+            {{ item.description }}
+          </p>
+          <div>
+            <div>
+              <button class="btn btn-danger mx-1" (click)="remove(item.ID)">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary mx-1" (click)="submit(basket.pets)">Submit</button>
+  </div>
+</div>
