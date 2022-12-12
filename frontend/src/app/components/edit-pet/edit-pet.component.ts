@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute} from '@angular/router';
 import { Pet } from 'src/app/models/pet';
 import { PetService } from 'src/app/services/pet.service';
@@ -17,7 +18,8 @@ export class EditPetComponent implements OnInit {
   @Input()
   isEdit: boolean = false;
 
-  constructor(private activatedRoute: ActivatedRoute, private petService: PetService) {
+  constructor(private petService: PetService,
+    private sanitizer: DomSanitizer) {
   }
 
   ngOnInit(): void {
@@ -55,6 +57,10 @@ export class EditPetComponent implements OnInit {
     this.petService.update(this.id, this.petForm.value).subscribe(result =>{
       window.location.href="/"
     })
+  }
+
+  b64Image(base64: string) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/png;base64, ${base64}`);
   }
 
 }

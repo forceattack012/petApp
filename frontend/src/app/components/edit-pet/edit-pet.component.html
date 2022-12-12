@@ -7,6 +7,20 @@
 
   <div class="row d-flex justify-content-center py-3">
     <form [formGroup]="petForm">
+      <div class="row">
+        <div class="col-12">
+          <img
+            *ngFor="let preview of pet.files"
+            [src]="b64Image(preview.content)"
+            class="preview"
+            height="100px"
+            alt="Image Source"
+          />
+          <br>
+          <!-- <button class="btn-sm btn-danger">delete</button> -->
+        </div>
+      </div>
+      <br>
       <div class="form-group">
         <label for="name">Name</label>
         <input

@@ -11,6 +11,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 })
 export class MyPetsComponent implements OnInit {
   myPets: Mypet[] = [];
+  isEdit = false;
+  id: string = '';
 
   constructor(private ownerService: OwnerService, private userService: UserService, private sanitizer: DomSanitizer) { }
 
@@ -19,9 +21,13 @@ export class MyPetsComponent implements OnInit {
       this.myPets = result
       console.log(this.myPets)
     })
+    this.id = '';
+    this.isEdit = false;
   }
 
   ngOnChanges(): void {
+    this.id = '';
+    this.isEdit = false;
   }
 
   b64Image(base64: string) {
@@ -32,6 +38,12 @@ export class MyPetsComponent implements OnInit {
     this.ownerService.deleOwner(id).subscribe(result => {
       window.location.reload();
     })
+  }
+
+  gotoEdit(id: string) {
+    this.isEdit = true;
+    this.id = id;
+    console.log(this.id)
   }
 
 }

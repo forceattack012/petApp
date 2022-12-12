@@ -25,6 +25,7 @@ type Pet struct {
 
 type PetResoponse struct {
 	Id          string `json:"id" binding:"required"`
+	PetId       string `json:"petId" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Type        string `json:"type"`
 	Description string `json:"description"`
@@ -193,7 +194,7 @@ func (h *PetHandler) GetOwnerByUserId(c *gin.Context) {
 	userId := c.Param("userId")
 
 	var petResp []PetResoponse
-	result := h.db.Raw("SELECT o.id, p.name, p.type, p.description, f.content FROM pets p JOIN owners o ON p.id = o.pet_id JOIN files f ON f.pet_id = p.id WHERE o.user_id = ? AND o.deleted_at IS NULL GROUP BY f.pet_id", userId).Scan(&petResp)
+	result := h.db.Raw("SELECT o.id, o.pet_id, p.name, p.type, p.description, f.content FROM pets p JOIN owners o ON p.id = o.pet_id JOIN files f ON f.pet_id = p.id WHERE o.user_id = ? AND o.deleted_at IS NULL GROUP BY f.pet_id", userId).Scan(&petResp)
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
