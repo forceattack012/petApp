@@ -6,22 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/forceattack012/petAppApi/file"
-	"github.com/forceattack012/petAppApi/owner"
+	"github.com/forceattack012/petAppApi/domain"
+	"github.com/forceattack012/petAppApi/entities"
 	"github.com/forceattack012/petAppApi/pagination"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
-
-type Pet struct {
-	gorm.Model
-	Name        string        `json:"name" binding:"required"`
-	Type        string        `json:"type"`
-	Description string        `json:"description"`
-	Age         string        `json:"age"`
-	Files       []file.File   `json:"files" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Owners      []owner.Owner `json:"owners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-}
 
 type PetResoponse struct {
 	Id          string `json:"id" binding:"required"`
@@ -32,22 +21,20 @@ type PetResoponse struct {
 	Content     string `json:"content"`
 }
 
-func (Pet) Tablename() string {
+func Tablename() string {
 	return "pets"
 }
 
 type PetHandler struct {
-	db *gorm.DB
+	domain.PetStore
 }
 
-func NewPetHandler(db *gorm.DB) *PetHandler {
-	return &PetHandler{
-		db: db,
-	}
+func NewPetHandler(d domain.PetStore) *PetHandler {
+	return &PetHandler{d}
 }
 
 func (h *PetHandler) NewPet(c *gin.Context) {
-	var pet Pet
+	var pet entities.Pet
 	if err := c.ShouldBindJSON(&pet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -55,16 +42,16 @@ func (h *PetHandler) NewPet(c *gin.Context) {
 		return
 	}
 
-	result := h.db.Create(&pet)
-	if err := result.Error; err != nil {
+	result := h.Save(&pet)
+	if result != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": result.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"ID": pet.Model.ID,
+		"ID": pet.ID,
 	})
 }
 
@@ -72,18 +59,28 @@ func (h *PetHandler) GetPets(c *gin.Context) {
 	q := c.Request.URL.Query()
 	pageSize, _ := strconv.Atoi(q.Get("limit"))
 	page, _ := strconv.Atoi(q.Get("page"))
-	var pets []Pet
+	var pets []entities.Pet
 	var totalRows int64
 
-	h.db.Raw("SELECT count(*) FROM pets p LEFT JOIN owners o ON p.id = o.pet_id WHERE o.id IS NULL AND o.deleted_at IS NULL").Scan(&totalRows)
-	fmt.Printf("total %d", totalRows)
+	h.PetStore.ExceuteSql("SELECT count(*) FROM pets p LEFT JOIN owners o ON p.id = o.pet_id WHERE o.id IS NULL AND o.deleted_at IS NULL", &totalRows)
+	fmt.Printf("total %d \n", totalRows)
+
+	if page == 0 {
+		page = 1
+	}
+
+	switch {
+	case pageSize > 100:
+		pageSize = 100
+	case pageSize <= 0:
+		pageSize = 10
+	}
 
 	totalPages := int(math.Ceil(float64(totalRows) / float64(pageSize)))
-
-	result := h.db.Scopes(Paginate(c)).Preload("Files").Joins("LEFT JOIN owners o ON pets.id = o.pet_id AND o.deleted_at IS NULL").Where("o.id IS NULL").Find(&pets)
-	if err := result.Error; err != nil {
+	resultErr := h.PetStore.Paginate(page, pageSize, "Files", "LEFT JOIN owners o ON pets.id = o.pet_id AND o.deleted_at IS NULL", "o.id IS NULL", &pets)
+	if resultErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": resultErr.Error(),
 		})
 		return
 	}
@@ -110,8 +107,8 @@ func (h *PetHandler) DeletePet(c *gin.Context) {
 		return
 	}
 
-	result := h.db.Preload("Files").Delete(&Pet{}, id)
-	if err := result.Error; err != nil {
+	resultErr := h.PetStore.Delete(&entities.Pet{}, id)
+	if resultErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -133,11 +130,11 @@ func (h *PetHandler) GetPet(c *gin.Context) {
 		return
 	}
 
-	var pet Pet
-	result := h.db.Preload("Files").Find(&pet, id)
-	if err := result.Error; err != nil {
+	var pet entities.Pet
+	errDb := h.PetStore.GetPet(&pet, id)
+	if errDb != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": errDb.Error(),
 		})
 		return
 	}
@@ -155,7 +152,7 @@ func (h *PetHandler) UpdatePet(c *gin.Context) {
 		return
 	}
 
-	var newPet Pet
+	var newPet entities.Pet
 	if err := c.ShouldBindJSON(&newPet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -163,9 +160,9 @@ func (h *PetHandler) UpdatePet(c *gin.Context) {
 		return
 	}
 
-	var pet Pet
-	result := h.db.Find(&pet, id)
-	if err := result.Error; err != nil {
+	var pet entities.Pet
+	resultErr := h.PetStore.GetPet(&pet, id)
+	if resultErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -176,11 +173,11 @@ func (h *PetHandler) UpdatePet(c *gin.Context) {
 	pet.Type = newPet.Type
 	pet.Description = newPet.Description
 	pet.Age = newPet.Age
-	resultUpdate := h.db.Updates(pet)
+	resultUpdate := h.PetStore.Update(&pet)
 
 	if err := resultUpdate.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": err,
 		})
 		return
 	}
@@ -194,8 +191,8 @@ func (h *PetHandler) GetOwnerByUserId(c *gin.Context) {
 	userId := c.Param("userId")
 
 	var petResp []PetResoponse
-	result := h.db.Raw("SELECT o.id, o.pet_id, p.name, p.type, p.description, f.content FROM pets p JOIN owners o ON p.id = o.pet_id JOIN files f ON f.pet_id = p.id WHERE o.user_id = ? AND o.deleted_at IS NULL GROUP BY f.pet_id", userId).Scan(&petResp)
-	if err := result.Error; err != nil {
+	err := h.PetStore.Raw("SELECT o.id, o.pet_id, p.name, p.type, p.description, f.content FROM pets p JOIN owners o ON p.id = o.pet_id JOIN files f ON f.pet_id = p.id WHERE o.user_id = ? AND o.deleted_at IS NULL GROUP BY f.pet_id", userId, &petResp)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -203,25 +200,4 @@ func (h *PetHandler) GetOwnerByUserId(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, petResp)
-}
-
-func Paginate(r *gin.Context) func(db *gorm.DB) *gorm.DB {
-	return func(db *gorm.DB) *gorm.DB {
-		q := r.Request.URL.Query()
-		page, _ := strconv.Atoi(q.Get("page"))
-		if page == 0 {
-			page = 1
-		}
-
-		pageSize, _ := strconv.Atoi(q.Get("limit"))
-		switch {
-		case pageSize > 100:
-			pageSize = 100
-		case pageSize <= 0:
-			pageSize = 10
-		}
-
-		offset := (page - 1) * pageSize
-		return db.Offset(offset).Limit(pageSize)
-	}
 }

@@ -5,13 +5,13 @@ import (
 	"net/http"
 
 	"github.com/ReneKroon/ttlcache"
-	"github.com/forceattack012/petAppApi/pet"
+	"github.com/forceattack012/petAppApi/entities"
 	"github.com/gin-gonic/gin"
 )
 
 type Basket struct {
-	Username string    `json:"name"`
-	Pets     []pet.Pet `json:"pets"`
+	Username string         `json:"name"`
+	Pets     []entities.Pet `json:"pets"`
 }
 
 type BasketHandler struct {

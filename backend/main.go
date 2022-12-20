@@ -14,9 +14,11 @@ import (
 
 	"github.com/forceattack012/petAppApi/auth"
 	"github.com/forceattack012/petAppApi/basket"
+	"github.com/forceattack012/petAppApi/entities"
 	"github.com/forceattack012/petAppApi/file"
 	"github.com/forceattack012/petAppApi/owner"
 	"github.com/forceattack012/petAppApi/pet"
+	"github.com/forceattack012/petAppApi/store"
 	"github.com/forceattack012/petAppApi/user"
 )
 
@@ -34,11 +36,10 @@ func main() {
 
 	var cache = ttlcache.NewCache()
 
-	db.AutoMigrate(&pet.Pet{})
+	db.AutoMigrate(&entities.Pet{})
 	db.AutoMigrate(&file.File{})
 	db.AutoMigrate(&user.User{})
 	db.AutoMigrate(&owner.Owner{})
-	petHandler := pet.NewPetHandler(db)
 	fileHandler := file.NewFileHandler(db)
 	userHandler := user.NewUserHandler(db)
 	ownerHandler := owner.NewOwnerHandler(db)
@@ -69,6 +70,9 @@ func main() {
 
 	signature := os.Getenv("signature")
 	bytes := []byte(signature)
+
+	store := store.NewPetStore(db)
+	petHandler := pet.NewPetHandler(store)
 
 	r.POST("/api/register", userHandler.CreateUser)
 	r.POST("/api/login", userHandler.Login(bytes))
