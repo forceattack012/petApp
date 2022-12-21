@@ -39,10 +39,9 @@ func main() {
 	db.AutoMigrate(&entities.Pet{})
 	db.AutoMigrate(&file.File{})
 	db.AutoMigrate(&user.User{})
-	db.AutoMigrate(&owner.Owner{})
+	db.AutoMigrate(&entities.Owner{})
 	fileHandler := file.NewFileHandler(db)
 	userHandler := user.NewUserHandler(db)
-	ownerHandler := owner.NewOwnerHandler(db)
 	basketHandler := basket.NewBasketHandler(cache)
 
 	r := gin.Default()
@@ -71,8 +70,11 @@ func main() {
 	signature := os.Getenv("signature")
 	bytes := []byte(signature)
 
-	store := store.NewPetStore(db)
-	petHandler := pet.NewPetHandler(store)
+	st := store.NewPetStore(db)
+	petHandler := pet.NewPetHandler(st)
+
+	ownerStore := store.NewOwnerStore(db)
+	ownerHandler := owner.NewOwnerHandler(ownerStore)
 
 	r.POST("/api/register", userHandler.CreateUser)
 	r.POST("/api/login", userHandler.Login(bytes))

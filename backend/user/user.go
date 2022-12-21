@@ -4,16 +4,16 @@ import (
 	"net/http"
 
 	"github.com/forceattack012/petAppApi/auth"
-	"github.com/forceattack012/petAppApi/owner"
+	"github.com/forceattack012/petAppApi/entities"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
-	Username string        `json:"username"`
-	Password string        `json:"password"`
-	Owners   []owner.Owner `json:"owners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Username string           `json:"username"`
+	Password string           `json:"password"`
+	Owners   []entities.Owner `json:"owners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type UserHandler struct {
