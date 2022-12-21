@@ -38,10 +38,9 @@ func main() {
 
 	db.AutoMigrate(&entities.Pet{})
 	db.AutoMigrate(&file.File{})
-	db.AutoMigrate(&user.User{})
+	db.AutoMigrate(&entities.User{})
 	db.AutoMigrate(&entities.Owner{})
 	fileHandler := file.NewFileHandler(db)
-	userHandler := user.NewUserHandler(db)
 	basketHandler := basket.NewBasketHandler(cache)
 
 	r := gin.Default()
@@ -75,6 +74,9 @@ func main() {
 
 	ownerStore := store.NewOwnerStore(db)
 	ownerHandler := owner.NewOwnerHandler(ownerStore)
+
+	userStore := store.NewUserStore(db)
+	userHandler := user.NewUserHandler(userStore)
 
 	r.POST("/api/register", userHandler.CreateUser)
 	r.POST("/api/login", userHandler.Login(bytes))

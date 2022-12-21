@@ -4,28 +4,21 @@ import (
 	"net/http"
 
 	"github.com/forceattack012/petAppApi/auth"
+	"github.com/forceattack012/petAppApi/domain"
 	"github.com/forceattack012/petAppApi/entities"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-type User struct {
-	gorm.Model
-	Username string           `json:"username"`
-	Password string           `json:"password"`
-	Owners   []entities.Owner `json:"owners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-}
-
 type UserHandler struct {
-	db *gorm.DB
+	domain.UserDomain
 }
 
-func NewUserHandler(db *gorm.DB) *UserHandler {
-	return &UserHandler{db: db}
+func NewUserHandler(d domain.UserDomain) *UserHandler {
+	return &UserHandler{d}
 }
 
 func (h *UserHandler) CreateUser(c *gin.Context) {
-	var user User
+	var user entities.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -33,10 +26,10 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	result := h.db.Create(&user)
+	result := h.UserDomain.Create(&user)
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": err,
 		})
 		return
 	}
@@ -48,7 +41,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 func (h *UserHandler) Login(signature []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var user User
+		var user entities.User
 		if err := c.ShouldBindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
@@ -56,11 +49,11 @@ func (h *UserHandler) Login(signature []byte) gin.HandlerFunc {
 			return
 		}
 
-		var userLogin User
-		result := h.db.Where("username = ? AND password = ?", user.Username, user.Password).Find(&userLogin)
+		var userLogin *entities.User
+		userLogin, result := h.UserDomain.GetUser(user.Username, user.Password)
 		if err := result.Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
+				"error": err,
 			})
 		}
 
@@ -79,7 +72,7 @@ func (h *UserHandler) Login(signature []byte) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"id":    userLogin.Model.ID,
+			"id":    userLogin.ID,
 			"name":  userLogin.Username,
 			"token": token,
 		})
