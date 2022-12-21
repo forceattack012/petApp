@@ -4,26 +4,21 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ReneKroon/ttlcache"
+	"github.com/forceattack012/petAppApi/domain"
 	"github.com/forceattack012/petAppApi/entities"
 	"github.com/gin-gonic/gin"
 )
 
-type Basket struct {
-	Username string         `json:"name"`
-	Pets     []entities.Pet `json:"pets"`
-}
-
 type BasketHandler struct {
-	Cache *ttlcache.Cache
+	domain.BasketDomain
 }
 
-func NewBasketHandler(cache *ttlcache.Cache) *BasketHandler {
-	return &BasketHandler{Cache: cache}
+func NewBasketHandler(d domain.BasketDomain) *BasketHandler {
+	return &BasketHandler{d}
 }
 
 func (h *BasketHandler) Add(c *gin.Context) {
-	var basket Basket
+	var basket entities.Basket
 	if err := c.ShouldBindJSON(&basket); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -31,7 +26,7 @@ func (h *BasketHandler) Add(c *gin.Context) {
 		return
 	}
 
-	h.Cache.Set(basket.Username, basket)
+	h.BasketDomain.Add(basket.Username, &basket)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "sucess",
@@ -42,7 +37,7 @@ func (h *BasketHandler) Get(c *gin.Context) {
 	userName := c.Param("username")
 	log.Printf("userName: %s", userName)
 
-	if basket, found := h.Cache.Get(userName); found {
+	if basket, found := h.BasketDomain.Get(userName); found {
 		c.JSON(http.StatusOK, basket)
 		return
 	}

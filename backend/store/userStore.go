@@ -14,14 +14,14 @@ func NewUserStore(g *gorm.DB) *UserStore {
 }
 
 func (s *UserStore) Create(user *entities.User) error {
-	return s.Create(user)
+	return s.DB.Create(user).Error
 }
 
-func (s *UserStore) GetUser(username string, password string) (*entities.User, error) {
-	var user *entities.User
+func (s *UserStore) GetUser(username string, password string) (entities.User, error) {
+	var user entities.User
 	err := s.Where("username = ? AND password = ?", username, password).Find(&user).Error
 	if err != nil {
-		return nil, err
+		return entities.User{}, err
 	}
 	return user, nil
 }

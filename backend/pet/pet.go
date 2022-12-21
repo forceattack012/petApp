@@ -26,10 +26,10 @@ func Tablename() string {
 }
 
 type PetHandler struct {
-	domain.PetStore
+	domain.PetDomain
 }
 
-func NewPetHandler(d domain.PetStore) *PetHandler {
+func NewPetHandler(d domain.PetDomain) *PetHandler {
 	return &PetHandler{d}
 }
 
@@ -62,7 +62,7 @@ func (h *PetHandler) GetPets(c *gin.Context) {
 	var pets []entities.Pet
 	var totalRows int64
 
-	h.PetStore.ExceuteSql("SELECT count(*) FROM pets p LEFT JOIN owners o ON p.id = o.pet_id WHERE o.id IS NULL AND o.deleted_at IS NULL", &totalRows)
+	h.PetDomain.ExceuteSql("SELECT count(*) FROM pets p LEFT JOIN owners o ON p.id = o.pet_id WHERE o.id IS NULL AND o.deleted_at IS NULL", &totalRows)
 	fmt.Printf("total %d \n", totalRows)
 
 	if page == 0 {
@@ -77,7 +77,7 @@ func (h *PetHandler) GetPets(c *gin.Context) {
 	}
 
 	totalPages := int(math.Ceil(float64(totalRows) / float64(pageSize)))
-	resultErr := h.PetStore.Paginate(page, pageSize, "Files", "LEFT JOIN owners o ON pets.id = o.pet_id AND o.deleted_at IS NULL", "o.id IS NULL", &pets)
+	resultErr := h.PetDomain.Paginate(page, pageSize, "Files", "LEFT JOIN owners o ON pets.id = o.pet_id AND o.deleted_at IS NULL", "o.id IS NULL", &pets)
 	if resultErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": resultErr.Error(),
@@ -107,7 +107,7 @@ func (h *PetHandler) DeletePet(c *gin.Context) {
 		return
 	}
 
-	resultErr := h.PetStore.Delete(&entities.Pet{}, id)
+	resultErr := h.PetDomain.Delete(&entities.Pet{}, id)
 	if resultErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -131,7 +131,7 @@ func (h *PetHandler) GetPet(c *gin.Context) {
 	}
 
 	var pet entities.Pet
-	errDb := h.PetStore.GetPet(&pet, id)
+	errDb := h.PetDomain.GetPet(&pet, id)
 	if errDb != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": errDb.Error(),
@@ -161,7 +161,7 @@ func (h *PetHandler) UpdatePet(c *gin.Context) {
 	}
 
 	var pet entities.Pet
-	resultErr := h.PetStore.GetPet(&pet, id)
+	resultErr := h.PetDomain.GetPet(&pet, id)
 	if resultErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -173,7 +173,7 @@ func (h *PetHandler) UpdatePet(c *gin.Context) {
 	pet.Type = newPet.Type
 	pet.Description = newPet.Description
 	pet.Age = newPet.Age
-	resultUpdate := h.PetStore.Update(&pet)
+	resultUpdate := h.PetDomain.Update(&pet)
 
 	if err := resultUpdate.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -191,7 +191,7 @@ func (h *PetHandler) GetOwnerByUserId(c *gin.Context) {
 	userId := c.Param("userId")
 
 	var petResp []PetResoponse
-	err := h.PetStore.Raw("SELECT o.id, o.pet_id, p.name, p.type, p.description, f.content FROM pets p JOIN owners o ON p.id = o.pet_id JOIN files f ON f.pet_id = p.id WHERE o.user_id = ? AND o.deleted_at IS NULL GROUP BY f.pet_id", userId, &petResp)
+	err := h.PetDomain.Raw("SELECT o.id, o.pet_id, p.name, p.type, p.description, f.content FROM pets p JOIN owners o ON p.id = o.pet_id JOIN files f ON f.pet_id = p.id WHERE o.user_id = ? AND o.deleted_at IS NULL GROUP BY f.pet_id", userId, &petResp)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

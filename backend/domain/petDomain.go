@@ -2,7 +2,7 @@ package domain
 
 import "github.com/forceattack012/petAppApi/entities"
 
-type PetStore interface {
+type PetDomain interface {
 	ExceuteSql(sql string, v interface{}) error
 	Raw(sql string, param interface{}, dest interface{}) error
 	Paginate(page int, pageSize int, preload string, sqlRaw string, where string, pet *[]entities.Pet) error

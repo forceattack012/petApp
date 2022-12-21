@@ -41,7 +41,6 @@ func main() {
 	db.AutoMigrate(&entities.User{})
 	db.AutoMigrate(&entities.Owner{})
 	fileHandler := file.NewFileHandler(db)
-	basketHandler := basket.NewBasketHandler(cache)
 
 	r := gin.Default()
 	config := cors.DefaultConfig()
@@ -77,6 +76,9 @@ func main() {
 
 	userStore := store.NewUserStore(db)
 	userHandler := user.NewUserHandler(userStore)
+
+	basketStore := store.NewBasketStore(cache)
+	basketHandler := basket.NewBasketHandler(basketStore)
 
 	r.POST("/api/register", userHandler.CreateUser)
 	r.POST("/api/login", userHandler.Login(bytes))

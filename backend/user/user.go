@@ -27,9 +27,9 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	}
 
 	result := h.UserDomain.Create(&user)
-	if err := result.Error; err != nil {
+	if result != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err,
+			"error": result.Error(),
 		})
 		return
 	}
@@ -49,11 +49,11 @@ func (h *UserHandler) Login(signature []byte) gin.HandlerFunc {
 			return
 		}
 
-		var userLogin *entities.User
+		var userLogin entities.User
 		userLogin, result := h.UserDomain.GetUser(user.Username, user.Password)
-		if err := result.Error; err != nil {
+		if result != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
+				"error": result.Error(),
 			})
 		}
 

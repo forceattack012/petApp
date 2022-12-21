@@ -10,10 +10,10 @@ import (
 )
 
 type OwnerHandler struct {
-	d domain.Owner
+	d domain.OwnerDomain
 }
 
-func NewOwnerHandler(d domain.Owner) *OwnerHandler {
+func NewOwnerHandler(d domain.OwnerDomain) *OwnerHandler {
 	return &OwnerHandler{
 		d: d,
 	}
