@@ -164,7 +164,7 @@ func (h *PetHandler) UpdatePet(c *gin.Context) {
 	resultErr := h.PetDomain.GetPet(&pet, id)
 	if resultErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": resultErr.Error(),
 		})
 		return
 	}
@@ -175,9 +175,9 @@ func (h *PetHandler) UpdatePet(c *gin.Context) {
 	pet.Age = newPet.Age
 	resultUpdate := h.PetDomain.Update(&pet)
 
-	if err := resultUpdate.Error; err != nil {
+	if resultUpdate != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err,
+			"error": resultUpdate.Error(),
 		})
 		return
 	}
